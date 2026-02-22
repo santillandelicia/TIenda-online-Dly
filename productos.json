@@ -42,5 +42,16 @@
     "brand": "Bioderma",
     "stock": 20,
     "image": "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop"
+  },
+  {
+    "id": 1771782758023,
+    "name": "Sublime Lifting DMAE",
+    "description": "Es una crema de efecto lifting que actúa sobre la estructura de la piel para devolverle su elasticidad natural. Su ingrediente estrella es el DMAE (Dimetilaminoetanol), un compuesto conocido en la cosmética profesional por su capacidad para mejorar el tono muscular y la tensión cutánea.\n\nFunciones Principales\nEfecto Tensor Inmediato: Proporciona una sensación de \"estiramiento\" o firmeza al poco tiempo de aplicarla.\n\nReafirmación Profunda: Trabaja de forma acumulativa para fortalecer los tejidos que han perdido elasticidad con el paso del tiempo.\n\nDefinición del Contorno: Ayuda a redefinir el óvalo facial, mejorando la apariencia de la mandíbula y el cuello (zonas propensas a la flacidez).\n\nBeneficios Clave\nCombate la Flacidez: Ideal para pieles maduras o aquellas que muestran signos prematuros de descolgamiento.\n\nHidratación y Textura: Además de tensar, su fórmula está diseñada para dejar la piel suave y con una textura más lisa.\n\nVersatilidad: Es apta para todo tipo de piel que necesite un aporte extra de firmeza.\n\nPresentación Práctica: El envase de 50 g con sistema de bombeo ayuda a conservar los activos sin que se oxiden con el aire y permite dosificar la cantidad exacta.",
+    "price": 48000,
+    "discount": 0,
+    "category": "Anti-age",
+    "brand": "Idraet",
+    "stock": 1,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_919447-MLA84845469057_052025-O.webp"
   }
 ]
