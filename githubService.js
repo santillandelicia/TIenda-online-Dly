@@ -8,8 +8,8 @@ class GitHubDB {
     constructor() {
         // Obtenemos el token guardado temporalmente.
         this.token = localStorage.getItem('github_pat') || '';
-        this.owner = 'santillandelicia';
-        this.repo = 'Tienda-online-Dly';
+        this.owner = 'santillandelicia'; // Updated owner
+        this.repo = 'Tienda-online-Dly'; // Updated repo
         this.path = 'productos.json';
         this.branch = 'main'; // O la rama que uses (master, main)
     }
