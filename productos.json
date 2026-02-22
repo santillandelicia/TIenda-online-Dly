@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "Sérum Hidratante Ácido Hialurónico",
+    "description": "Un sérum ultraligero que hidrata profundamente, dejando la piel rellena y luminosa ('glass skin').",
+    "price": 25000,
+    "discount": 15,
+    "category": "Hidratación",
+    "brand": "La Roche-Posay",
+    "stock": 10,
+    "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop"
+  },
+  {
+    "id": 2,
+    "name": "Gel Limpiador Suave con Ceramidas",
+    "description": "Limpiador diario que elimina impurezas sin alterar la barrera natural de la piel.",
+    "price": 18000,
+    "discount": 0,
+    "category": "Limpieza",
+    "brand": "CeraVe",
+    "stock": 5,
+    "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=800&auto=format&fit=crop"
+  },
+  {
+    "id": 3,
+    "name": "Protector Solar Fluido FPS 50+",
+    "description": "Protección invisible con acabado mate. Ideal para uso diario bajo el maquillaje.",
+    "price": 32000,
+    "discount": 0,
+    "category": "Protección",
+    "brand": "ISDIN",
+    "stock": 0,
+    "image": "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop"
+  },
+  {
+    "id": 4,
+    "name": "Agua Micelar Calmante",
+    "description": "Desmaquillante gentil con extracto de manzanilla, ideal para pieles sensibles.",
+    "price": 15000,
+    "discount": 20,
+    "category": "Limpieza",
+    "brand": "Bioderma",
+    "stock": 20,
+    "image": "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop"
+  }
+]
