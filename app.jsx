@@ -1,14 +1,21 @@
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 
 // --- Configuración ---
-const WHATSAPP_NUMBER = "5493815693576"; // Número sin '+' ni espacios
-// Repositorio donde están los productos. Formato: usuario/repo
-// TODO: El usuario necesita actualizar esto con su repo real
-const GITHUB_REPO = "usuario/dermocosmetica-app";
+const WHATSAPP_NUMBER = "5493815693576";
+const GITHUB_REPO = "santillandelicia/Tienda-online-Dly";
+
+// --- Helpers ---
+const getFinalPrice = (product) => {
+    if (product.discount > 0) {
+        return product.price - (product.price * (product.discount / 100));
+    }
+    return product.price;
+};
 
 // --- Componentes ---
 
-const Navbar = ({ onNavigate }) => (
+// ======== NAVBAR ========
+const Navbar = ({ onNavigate, cartCount, onCartOpen }) => (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-20 items-center">
@@ -20,7 +27,23 @@ const Navbar = ({ onNavigate }) => (
                         >.</span>
                     </h1>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
+                    {/* Carrito */}
+                    <button
+                        onClick={onCartOpen}
+                        className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        aria-label="Abrir carrito"
+                    >
+                        <svg className="w-6 h-6 text-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-secondary text-dark text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm animate-bounce">
+                                {cartCount}
+                            </span>
+                        )}
+                    </button>
+                    {/* Contacto */}
                     <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer" className="bg-primary text-dark px-6 py-2 rounded-full font-medium hover:bg-[#c9dbce] transition-all transform hover:scale-105 active:scale-95 shadow-sm">
                         Contacto
                     </a>
@@ -30,30 +53,107 @@ const Navbar = ({ onNavigate }) => (
     </nav>
 );
 
-const Footer = () => (
-    <footer className="bg-primary mt-24 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center opacity-80">
-            <p className="text-dark font-medium">&copy; {new Date().getFullYear()} D'ly Dermocosmética. Todos los derechos reservados.</p>
-            <div className="mt-4 md:mt-0 space-x-4 text-sm">
-                <a href="#" className="hover:text-secondary transition-colors">Instagram</a>
-                <a href="#" className="hover:text-secondary transition-colors">Términos</a>
-            </div>
-        </div>
-    </footer>
-);
+// ======== CART DRAWER ========
+const CartDrawer = ({ isOpen, onClose, cart, onUpdateQty, onRemove }) => {
+    const total = cart.reduce((sum, item) => sum + getFinalPrice(item.product) * item.quantity, 0);
 
-const ProductCard = ({ product }) => {
-    const isOutOfStock = product.stock <= 0;
-    const finalPrice = product.discount > 0
-        ? product.price - (product.price * (product.discount / 100))
-        : product.price;
-
-    const handleBuy = () => {
-        if (isOutOfStock) return;
-        const message = `Hola! Me gustaría comprar el producto: ${product.name} ($${finalPrice.toLocaleString('es-AR')}) ${product.brand ? '- ' + product.brand : ''}`;
+    const handleWhatsApp = () => {
+        let message = "¡Hola! Me gustaría realizar el siguiente pedido:\n\n";
+        cart.forEach((item, i) => {
+            const price = getFinalPrice(item.product);
+            message += `${i + 1}. ${item.product.name} x${item.quantity} — $${(price * item.quantity).toLocaleString('es-AR')}\n`;
+        });
+        message += `\n💰 Total: $${total.toLocaleString('es-AR')}`;
         const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
     };
+
+    return (
+        <>
+            {/* Overlay */}
+            <div
+                className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={onClose}
+            ></div>
+
+            {/* Drawer */}
+            <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                    <h2 className="text-xl font-bold text-dark flex items-center gap-2">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        Mi Carrito
+                    </h2>
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+
+                {/* Items */}
+                <div className="flex-grow overflow-y-auto p-6 space-y-4">
+                    {cart.length === 0 ? (
+                        <div className="text-center py-16">
+                            <svg className="w-16 h-16 mx-auto text-dark/15 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                            <p className="text-dark/50 font-medium">Tu carrito está vacío</p>
+                            <p className="text-dark/30 text-sm mt-1">Explorá nuestro catálogo y agregá productos</p>
+                        </div>
+                    ) : (
+                        cart.map(item => {
+                            const price = getFinalPrice(item.product);
+                            return (
+                                <div key={item.product.id} className="flex gap-4 bg-gray-50 rounded-2xl p-4">
+                                    <img src={item.product.image} alt={item.product.name} className="w-20 h-20 rounded-xl object-cover bg-gray-200 flex-shrink-0" />
+                                    <div className="flex-grow min-w-0">
+                                        <h4 className="font-semibold text-dark text-sm truncate">{item.product.name}</h4>
+                                        {item.product.brand && <p className="text-xs text-dark/50">{item.product.brand}</p>}
+                                        <p className="text-sm font-bold text-dark mt-1">${price.toLocaleString('es-AR')}</p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <button onClick={() => onUpdateQty(item.product.id, -1)} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-dark hover:bg-gray-100 transition-colors font-bold text-sm">−</button>
+                                            <span className="text-sm font-semibold w-6 text-center">{item.quantity}</span>
+                                            <button onClick={() => onUpdateQty(item.product.id, 1)} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-dark hover:bg-gray-100 transition-colors font-bold text-sm">+</button>
+                                            <button onClick={() => onRemove(item.product.id)} className="ml-auto text-red-400 hover:text-red-600 transition-colors p-1">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="flex-shrink-0 text-right">
+                                        <p className="text-sm font-bold text-dark">${(price * item.quantity).toLocaleString('es-AR')}</p>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+
+                {/* Footer */}
+                {cart.length > 0 && (
+                    <div className="border-t border-gray-100 p-6 space-y-4 bg-white">
+                        <div className="flex justify-between items-center">
+                            <span className="text-dark/70 font-medium">Total</span>
+                            <span className="text-2xl font-bold text-dark">${total.toLocaleString('es-AR')}</span>
+                        </div>
+                        <button
+                            onClick={handleWhatsApp}
+                            className="w-full bg-[#25D366] text-white py-3.5 rounded-2xl font-bold text-base hover:bg-[#1fb855] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-3"
+                        >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.624-1.467A11.932 11.932 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.193-.586-5.934-1.608l-.425-.254-2.741.87.878-2.677-.278-.442A9.776 9.776 0 012.182 12c0-5.413 4.405-9.818 9.818-9.818S21.818 6.587 21.818 12s-4.405 9.818-9.818 9.818z" /></svg>
+                            Ir a WhatsApp
+                        </button>
+                        <p className="text-xs text-dark/50 text-center leading-relaxed">
+                            📍 La compra se coordina con la vendedora.<br />
+                            Los productos se retiran en el local.
+                        </p>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+};
+
+// ======== PRODUCT CARD (Catálogo - sin descripción) ========
+const ProductCard = ({ product, onNavigate, onAddToCart, isFavorite, onToggleFavorite }) => {
+    const isOutOfStock = product.stock <= 0;
+    const finalPrice = getFinalPrice(product);
 
     return (
         <div className={`group bg-white rounded-3xl overflow-hidden shadow-soft ${isOutOfStock ? 'opacity-70 grayscale-[30%]' : 'hover:shadow-lg transition-all duration-300'} flex flex-col h-full border border-gray-50 relative`}>
@@ -72,7 +172,21 @@ const ProductCard = ({ product }) => {
                 )}
             </div>
 
-            <div className="relative aspect-square overflow-hidden bg-gray-50">
+            {/* Favorite heart */}
+            <button
+                onClick={(e) => { e.stopPropagation(); onToggleFavorite(product.id); }}
+                className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-all"
+                aria-label="Favorito"
+            >
+                {isFavorite ? (
+                    <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+                ) : (
+                    <svg className="w-5 h-5 text-dark/30 hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                )}
+            </button>
+
+            {/* Image — clickable */}
+            <div className="relative aspect-square overflow-hidden bg-gray-50 cursor-pointer" onClick={() => onNavigate(`/producto/${product.id}`)}>
                 <img
                     src={product.image}
                     alt={product.name}
@@ -83,10 +197,12 @@ const ProductCard = ({ product }) => {
                     {product.category}
                 </div>
             </div>
+
+            {/* Info — sin descripción */}
             <div className="p-6 flex flex-col flex-grow">
                 {product.brand && <span className="text-xs font-bold tracking-wider text-dark/50 uppercase mb-1">{product.brand}</span>}
-                <h3 className="text-xl font-semibold mb-2 leading-tight">{product.name}</h3>
-                <p className="text-dark/70 text-sm flex-grow mb-4 leading-relaxed">{product.description}</p>
+                <h3 className="text-lg font-semibold mb-1 leading-tight cursor-pointer hover:text-dark/70 transition-colors" onClick={() => onNavigate(`/producto/${product.id}`)}>{product.name}</h3>
+
                 <div className="flex flex-col mt-auto pt-4 border-t border-gray-100 gap-3">
                     <div className="flex items-end justify-between">
                         <div className="flex flex-col">
@@ -100,12 +216,18 @@ const ProductCard = ({ product }) => {
                             </span>
                         </div>
                         <button
-                            onClick={handleBuy}
+                            onClick={(e) => { e.stopPropagation(); if (!isOutOfStock) onAddToCart(product); }}
                             disabled={isOutOfStock}
-                            className={`${isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-secondary text-dark hover:bg-[#fccece] hover:-translate-y-1 active:translate-y-0'} px-5 py-2.5 rounded-full font-medium transition-all transform shadow-sm flex items-center gap-2`}
+                            className={`${isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-secondary text-dark hover:bg-[#fccece] hover:-translate-y-1 active:translate-y-0'} px-4 py-2.5 rounded-full font-medium transition-all transform shadow-sm flex items-center gap-2 text-sm`}
                         >
-                            <span>{isOutOfStock ? 'Agotado' : 'Comprar'}</span>
-                            {!isOutOfStock && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>}
+                            {isOutOfStock ? (
+                                <span>Agotado</span>
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                                    <span>Agregar</span>
+                                </>
+                            )}
                         </button>
                     </div>
                     {!isOutOfStock && product.stock <= 5 && (
@@ -120,29 +242,159 @@ const ProductCard = ({ product }) => {
     );
 };
 
-const StoreFront = ({ products, loading }) => {
-    // Filter states
+// ======== PRODUCT DETAIL PAGE ========
+const ProductDetail = ({ product, onNavigate, onAddToCart, isFavorite, onToggleFavorite }) => {
+    const [addedFeedback, setAddedFeedback] = useState(false);
+
+    if (!product) {
+        return (
+            <div className="flex-grow flex items-center justify-center py-20">
+                <div className="text-center">
+                    <p className="text-xl text-dark/60 font-medium mb-4">Producto no encontrado</p>
+                    <button onClick={() => onNavigate('/')} className="text-primary hover:text-dark underline transition-colors">Volver al catálogo</button>
+                </div>
+            </div>
+        );
+    }
+
+    const isOutOfStock = product.stock <= 0;
+    const finalPrice = getFinalPrice(product);
+
+    const handleAddToCart = () => {
+        if (isOutOfStock) return;
+        onAddToCart(product);
+        setAddedFeedback(true);
+        setTimeout(() => setAddedFeedback(false), 2000);
+    };
+
+    return (
+        <main className="flex-grow">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Back button */}
+                <button
+                    onClick={() => onNavigate('/')}
+                    className="flex items-center gap-2 text-dark/60 hover:text-dark mb-8 font-medium transition-colors group"
+                >
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    Volver al catálogo
+                </button>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    {/* Image */}
+                    <div className="relative rounded-3xl overflow-hidden bg-gray-50 aspect-square">
+                        <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover object-center"
+                        />
+                        {/* Badges */}
+                        <div className="absolute top-6 left-6 flex flex-col gap-2">
+                            {product.discount > 0 && (
+                                <span className="bg-secondary text-dark px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
+                                    -{product.discount}% OFF
+                                </span>
+                            )}
+                            {isOutOfStock && (
+                                <span className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
+                                    Sin Stock
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex flex-col justify-center">
+                        <div className="flex items-center gap-3 mb-3">
+                            <span className="bg-primary/30 text-dark px-3 py-1 rounded-full text-xs font-medium">{product.category}</span>
+                            {product.brand && <span className="text-xs font-bold tracking-wider text-dark/50 uppercase">{product.brand}</span>}
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-bold text-dark mb-6 leading-tight">{product.name}</h1>
+
+                        {/* Description */}
+                        <div className="bg-gray-50 rounded-2xl p-6 mb-6">
+                            <h3 className="text-sm font-bold text-dark/50 uppercase tracking-wider mb-3">Descripción</h3>
+                            <p className="text-dark/80 leading-relaxed">{product.description}</p>
+                        </div>
+
+                        {/* Price */}
+                        <div className="mb-6">
+                            {product.discount > 0 && (
+                                <span className="text-lg text-dark/40 line-through decoration-red-400 mr-3">
+                                    ${Number(product.price).toLocaleString('es-AR')}
+                                </span>
+                            )}
+                            <span className="text-4xl font-bold text-dark">
+                                ${finalPrice.toLocaleString('es-AR')}
+                            </span>
+                        </div>
+
+                        {/* Stock */}
+                        {!isOutOfStock && product.stock <= 5 && (
+                            <div className="text-sm text-orange-600 font-medium flex items-center gap-2 mb-6 bg-orange-50 px-4 py-2 rounded-xl">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                ¡Últimas {product.stock} unidades disponibles!
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={isOutOfStock}
+                                className={`flex-grow ${isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : addedFeedback ? 'bg-green-500 text-white' : 'bg-dark text-white hover:bg-[#3d493a]'} px-8 py-4 rounded-2xl font-bold text-base transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center gap-3`}
+                            >
+                                {isOutOfStock ? (
+                                    'Agotado'
+                                ) : addedFeedback ? (
+                                    <>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                        ¡Agregado!
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                                        Agregar al carrito
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                onClick={() => onToggleFavorite(product.id)}
+                                className={`px-6 py-4 rounded-2xl font-bold text-base transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 border-2 ${isFavorite ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-200 text-dark/60 hover:border-red-200 hover:text-red-400'}`}
+                            >
+                                {isFavorite ? (
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                )}
+                                <span className="hidden sm:inline">{isFavorite ? 'En favoritos' : 'Favorito'}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
+};
+
+// ======== STOREFRONT ========
+const StoreFront = ({ products, loading, onNavigate, onAddToCart, favorites, onToggleFavorite }) => {
     const [selectedCategory, setSelectedCategory] = useState("Todas");
     const [selectedBrand, setSelectedBrand] = useState("Todas");
-    const [maxPrice, setMaxPrice] = useState(100000); // Valor inicial alto
+    const [maxPrice, setMaxPrice] = useState(100000);
 
-    // Extract unique categories and brands
     const categories = ["Todas", ...new Set(products.map(p => p.category).filter(Boolean))];
     const brands = ["Todas", ...new Set(products.map(p => p.brand).filter(Boolean))];
 
-    // Find min/max price for range slider dynamically
     useEffect(() => {
         if (products.length > 0) {
-            const max = Math.max(...products.map(p => {
-                return p.discount > 0 ? p.price - (p.price * (p.discount / 100)) : p.price;
-            }));
+            const max = Math.max(...products.map(p => getFinalPrice(p)));
             setMaxPrice(Math.ceil(max));
         }
     }, [products]);
 
-    // Apply filters
     const filteredProducts = products.filter(p => {
-        const pFinalPrice = p.discount > 0 ? p.price - (p.price * (p.discount / 100)) : p.price;
+        const pFinalPrice = getFinalPrice(p);
         const passCategory = selectedCategory === "Todas" || p.category === selectedCategory;
         const passBrand = selectedBrand === "Todas" || p.brand === selectedBrand;
         const passPrice = pFinalPrice <= maxPrice;
@@ -167,59 +419,30 @@ const StoreFront = ({ products, loading }) => {
 
                 {/* Advanced Filters Area */}
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-12 flex flex-col md:flex-row gap-6 justify-between items-center">
-
-                    {/* Category */}
                     <div className="flex-1 w-full">
                         <label className="block text-xs font-bold text-dark/50 uppercase tracking-wider mb-2">Categoría</label>
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 text-dark text-sm rounded-xl focus:ring-primary focus:border-primary block p-2.5 transition-colors focus:outline-none"
-                        >
+                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-dark text-sm rounded-xl focus:ring-primary focus:border-primary block p-2.5 transition-colors focus:outline-none">
                             {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     </div>
-
-                    {/* Brand */}
                     <div className="flex-1 w-full">
                         <label className="block text-xs font-bold text-dark/50 uppercase tracking-wider mb-2">Marca</label>
-                        <select
-                            value={selectedBrand}
-                            onChange={(e) => setSelectedBrand(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 text-dark text-sm rounded-xl focus:ring-primary focus:border-primary block p-2.5 transition-colors focus:outline-none"
-                        >
+                        <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-dark text-sm rounded-xl focus:ring-primary focus:border-primary block p-2.5 transition-colors focus:outline-none">
                             {brands.map(brand => <option key={brand} value={brand}>{brand}</option>)}
                         </select>
                     </div>
-
-                    {/* Price Range */}
                     <div className="flex-1 w-full flex flex-col justify-center">
                         <label className="block text-xs font-bold text-dark/50 uppercase tracking-wider mb-2 flex justify-between">
                             Precio Máximo <span>${maxPrice.toLocaleString('es-AR')}</span>
                         </label>
-                        <input
-                            type="range"
-                            min="0"
-                            max="100000"
-                            step="1000"
-                            value={maxPrice}
-                            onChange={(e) => setMaxPrice(Number(e.target.value))}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-dark"
-                        />
+                        <input type="range" min="0" max="100000" step="1000" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-dark" />
                     </div>
                 </div>
 
-                {/* Categories Pills (Quick Filters) */}
+                {/* Categories Pills */}
                 <div className="flex flex-wrap gap-2 justify-center mb-12">
                     {categories.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`px-5 py-2 rounded-full text-xs font-medium transition-all duration-300 ${selectedCategory === cat
-                                ? 'bg-dark text-white shadow-sm transform scale-105'
-                                : 'bg-white text-dark/70 hover:bg-gray-50 border border-gray-100 shadow-sm'
-                                }`}
-                        >
+                        <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-5 py-2 rounded-full text-xs font-medium transition-all duration-300 ${selectedCategory === cat ? 'bg-dark text-white shadow-sm transform scale-105' : 'bg-white text-dark/70 hover:bg-gray-50 border border-gray-100 shadow-sm'}`}>
                             {cat}
                         </button>
                     ))}
@@ -233,7 +456,14 @@ const StoreFront = ({ products, loading }) => {
                 ) : filteredProducts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {filteredProducts.map(product => (
-                            <ProductCard key={product.id} product={product} />
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                onNavigate={onNavigate}
+                                onAddToCart={onAddToCart}
+                                isFavorite={favorites.includes(product.id)}
+                                onToggleFavorite={onToggleFavorite}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -254,10 +484,9 @@ const AdminDashboard = ({ onLogout }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [gitSha, setGitSha] = useState(null);
-    const [editingProduct, setEditingProduct] = useState(null); // null = no editing, {} = new, {...} = edit
+    const [editingProduct, setEditingProduct] = useState(null);
     const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
 
-    // Auth State
     const [isAuthenticated, setIsAuthenticated] = useState(!!window.githubDB.getToken());
     const [tokenInput, setTokenInput] = useState('');
 
@@ -322,7 +551,7 @@ const AdminDashboard = ({ onLogout }) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const productData = {
-            id: editingProduct.id || Date.now(), // Generate ID for new
+            id: editingProduct.id || Date.now(),
             name: formData.get('name'),
             description: formData.get('description'),
             price: Number(formData.get('price')),
@@ -386,23 +615,13 @@ const AdminDashboard = ({ onLogout }) => {
                         <p className="text-sm text-dark/60">Gestiona tus productos directamente en GitHub</p>
                     </div>
                     <div className="flex gap-3">
-                        <button
-                            onClick={() => setEditingProduct({})}
-                            className="bg-primary text-dark px-4 py-2 rounded-xl font-medium hover:bg-[#c9dbce] transition-colors text-sm flex items-center gap-2"
-                        >
+                        <button onClick={() => setEditingProduct({})} className="bg-primary text-dark px-4 py-2 rounded-xl font-medium hover:bg-[#c9dbce] transition-colors text-sm flex items-center gap-2">
                             <span>+ Nuevo Producto</span>
                         </button>
-                        <button
-                            onClick={handleSaveToGithub}
-                            disabled={loading}
-                            className="bg-dark text-white px-4 py-2 rounded-xl font-medium hover:bg-[#3d493a] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
+                        <button onClick={handleSaveToGithub} disabled={loading} className="bg-dark text-white px-4 py-2 rounded-xl font-medium hover:bg-[#3d493a] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                             {loading ? 'Guardando...' : 'Guardar en GitHub'}
                         </button>
-                        <button
-                            onClick={handleLogout}
-                            className="bg-secondary text-dark px-4 py-2 rounded-xl font-medium hover:bg-[#fccece] transition-colors text-sm"
-                        >
+                        <button onClick={handleLogout} className="bg-secondary text-dark px-4 py-2 rounded-xl font-medium hover:bg-[#fccece] transition-colors text-sm">
                             Salir
                         </button>
                     </div>
@@ -410,15 +629,12 @@ const AdminDashboard = ({ onLogout }) => {
 
                 {/* Status Message */}
                 {statusMessage.text && (
-                    <div className={`p-4 rounded-xl text-sm font-medium ${statusMessage.type === 'error' ? 'bg-red-100 text-red-800' :
-                        statusMessage.type === 'success' ? 'bg-green-100 text-green-800' :
-                            'bg-blue-100 text-blue-800'
-                        }`}>
+                    <div className={`p-4 rounded-xl text-sm font-medium ${statusMessage.type === 'error' ? 'bg-red-100 text-red-800' : statusMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
                         {statusMessage.text}
                     </div>
                 )}
 
-                {/* Product Form Modal (Simplified inline for now) */}
+                {/* Product Form */}
                 {editingProduct && (
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative">
                         <h3 className="text-xl font-bold mb-4">{editingProduct.id ? 'Editar Producto' : 'Nuevo Producto'}</h3>
@@ -521,22 +737,43 @@ const App = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Cart state
+    const [cart, setCart] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dly_cart');
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
+    });
+    const [cartOpen, setCartOpen] = useState(false);
+
+    // Favorites state
+    const [favorites, setFavorites] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dly_favorites');
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
+    });
+
+    // Persist cart
     useEffect(() => {
-        // Simple routing listeners
+        localStorage.setItem('dly_cart', JSON.stringify(cart));
+    }, [cart]);
+
+    // Persist favorites
+    useEffect(() => {
+        localStorage.setItem('dly_favorites', JSON.stringify(favorites));
+    }, [favorites]);
+
+    useEffect(() => {
         const handleHashChange = () => setCurrentRoute(window.location.hash || '#/');
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
 
     useEffect(() => {
-        // Fetch inicial de productos
         const fetchProducts = async () => {
             try {
-                // Para GitHub Pages o dev local, lee del JSON local como fuente de verdad inicial si no usa API (simplificado de momento)
-                // Idealmente en prod configuraremos que lea directo desde la API de github para ver los cambios recientes sin cache agresivo.
-
-                // Intento primero leer el archivo local:
-                const response = await fetch('./productos.json?t=' + new Date().getTime()); // Evitar caché local
+                const response = await fetch('./productos.json?t=' + new Date().getTime());
                 if (response.ok) {
                     const data = await response.json();
                     setProducts(data);
@@ -549,7 +786,6 @@ const App = () => {
                 setLoading(false);
             }
         };
-
         fetchProducts();
     }, []);
 
@@ -557,17 +793,102 @@ const App = () => {
         window.location.hash = '#' + path;
     };
 
+    // Cart actions
+    const addToCart = (product) => {
+        setCart(prev => {
+            const existing = prev.find(item => item.product.id === product.id);
+            if (existing) {
+                return prev.map(item =>
+                    item.product.id === product.id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                );
+            }
+            return [...prev, { product, quantity: 1 }];
+        });
+    };
+
+    const updateCartQty = (productId, delta) => {
+        setCart(prev =>
+            prev.map(item => {
+                if (item.product.id === productId) {
+                    const newQty = item.quantity + delta;
+                    return newQty > 0 ? { ...item, quantity: newQty } : item;
+                }
+                return item;
+            }).filter(item => item.quantity > 0)
+        );
+    };
+
+    const removeFromCart = (productId) => {
+        setCart(prev => prev.filter(item => item.product.id !== productId));
+    };
+
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Favorites actions
+    const toggleFavorite = (productId) => {
+        setFavorites(prev =>
+            prev.includes(productId)
+                ? prev.filter(id => id !== productId)
+                : [...prev, productId]
+        );
+    };
+
+    // Routing: detect product detail page
+    const productMatch = currentRoute.match(/^#\/producto\/(\d+)$/);
+    const currentProduct = productMatch ? products.find(p => p.id === Number(productMatch[1])) : null;
+
     return (
         <div className="min-h-screen flex flex-col font-sans">
-            <Navbar onNavigate={handleNavigate} />
+            <Navbar onNavigate={handleNavigate} cartCount={cartCount} onCartOpen={() => setCartOpen(true)} />
 
-            {currentRoute === '#/' && <StoreFront products={products} loading={loading} />}
+            {/* Cart Drawer */}
+            <CartDrawer
+                isOpen={cartOpen}
+                onClose={() => setCartOpen(false)}
+                cart={cart}
+                onUpdateQty={updateCartQty}
+                onRemove={removeFromCart}
+            />
+
+            {currentRoute === '#/' && (
+                <StoreFront
+                    products={products}
+                    loading={loading}
+                    onNavigate={handleNavigate}
+                    onAddToCart={addToCart}
+                    favorites={favorites}
+                    onToggleFavorite={toggleFavorite}
+                />
+            )}
+            {productMatch && (
+                <ProductDetail
+                    product={currentProduct}
+                    onNavigate={handleNavigate}
+                    onAddToCart={addToCart}
+                    isFavorite={currentProduct ? favorites.includes(currentProduct.id) : false}
+                    onToggleFavorite={toggleFavorite}
+                />
+            )}
             {currentRoute === '#/admin' && <AdminDashboard onLogout={() => handleNavigate('/')} />}
 
             <Footer />
         </div>
     );
 };
+
+const Footer = () => (
+    <footer className="bg-primary mt-24 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center opacity-80">
+            <p className="text-dark font-medium">&copy; {new Date().getFullYear()} D'ly Dermocosmética. Todos los derechos reservados.</p>
+            <div className="mt-4 md:mt-0 space-x-4 text-sm">
+                <a href="#" className="hover:text-secondary transition-colors">Instagram</a>
+                <a href="#" className="hover:text-secondary transition-colors">Términos</a>
+            </div>
+        </div>
+    </footer>
+);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
