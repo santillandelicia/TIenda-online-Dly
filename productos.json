@@ -1,49 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "Sérum Hidratante Ácido Hialurónico",
-    "description": "Un sérum ultraligero que hidrata profundamente, dejando la piel rellena y luminosa ('glass skin').",
-    "price": 25000,
-    "discount": 15,
-    "category": "Hidratación",
-    "brand": "La Roche-Posay",
-    "stock": 10,
-    "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop"
-  },
-  {
-    "id": 2,
-    "name": "Gel Limpiador Suave con Ceramidas",
-    "description": "Limpiador diario que elimina impurezas sin alterar la barrera natural de la piel",
-    "price": 18000,
-    "discount": 0,
-    "category": "Limpieza",
-    "brand": "CeraVe",
-    "stock": 5,
-    "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=800&auto=format&fit=crop"
-  },
-  {
-    "id": 3,
-    "name": "Protector Solar Fluido FPS 50+",
-    "description": "Protección invisible con acabado mate. Ideal para uso diario bajo el maquillaje.",
-    "price": 32000,
-    "discount": 0,
-    "category": "Protección",
-    "brand": "ISDIN",
-    "stock": 0,
-    "image": "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop"
-  },
-  {
-    "id": 4,
-    "name": "Agua Micelar Calmante",
-    "description": "Desmaquillante gentil con extracto de manzanilla, ideal para pieles sensibles.",
-    "price": 15000,
-    "discount": 20,
-    "category": "Limpieza",
-    "brand": "Bioderma",
-    "stock": 20,
-    "image": "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop"
-  },
-  {
     "id": 1771782758023,
     "name": "Sublime Lifting DMAE",
     "description": "Es una crema de efecto lifting que actúa sobre la estructura de la piel para devolverle su elasticidad natural. Su ingrediente estrella es el DMAE (Dimetilaminoetanol), un compuesto conocido en la cosmética profesional por su capacidad para mejorar el tono muscular y la tensión cutánea.\n\nFunciones Principales\nEfecto Tensor Inmediato: Proporciona una sensación de \"estiramiento\" o firmeza al poco tiempo de aplicarla.\n\nReafirmación Profunda: Trabaja de forma acumulativa para fortalecer los tejidos que han perdido elasticidad con el paso del tiempo.\n\nDefinición del Contorno: Ayuda a redefinir el óvalo facial, mejorando la apariencia de la mandíbula y el cuello (zonas propensas a la flacidez).\n\nBeneficios Clave\nCombate la Flacidez: Ideal para pieles maduras o aquellas que muestran signos prematuros de descolgamiento.\n\nHidratación y Textura: Además de tensar, su fórmula está diseñada para dejar la piel suave y con una textura más lisa.\n\nVersatilidad: Es apta para todo tipo de piel que necesite un aporte extra de firmeza.\n\nPresentación Práctica: El envase de 50 g con sistema de bombeo ayuda a conservar los activos sin que se oxiden con el aire y permite dosificar la cantidad exacta.",
