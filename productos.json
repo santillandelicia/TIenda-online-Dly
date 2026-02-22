@@ -9,5 +9,16 @@
     "brand": "Idraet",
     "stock": 1,
     "image": "https://http2.mlstatic.com/D_NQ_NP_919447-MLA84845469057_052025-O.webp"
+  },
+  {
+    "id": 1771795307384,
+    "name": "Mascara Secativa",
+    "description": "xtracto de Tea Tree Oil (Melaleuca alternifolia): Este ingrediente es ampliamente valorado por sus propiedades naturales antisépticas, purificantes y calmantes, ideales para tratar brotes e inflamaciones.\n\nFunciones y Beneficios\nAcción Secativa: Ayuda a acelerar el proceso de secado de las impurezas y granitos.\n\nControl de Oleosidad: Contribuye a regular el brillo facial y a limpiar profundamente los poros.\n\nHigiene Profunda: Facilita la eliminación de toxinas y residuos que suelen obstruir los poros en pieles grasas.\n\nInformación del Producto\nContenido Neto: 60 ml (2 fl. Oz.).\n\nTipo de Piel: Indicado específicamente para pieles grasas o con tendencia acneica.",
+    "price": 18000,
+    "discount": 0,
+    "category": "Acné",
+    "brand": "Exel",
+    "stock": 1,
+    "image": "https://photos.app.goo.gl/MgcWUr9XJCpuYME56"
   }
 ]
