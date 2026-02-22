@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D'ly Dermocosmética</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#DAE7D7',   /* Verde suave/clínico */
+                        secondary: '#FDDEDE', /* Rosa suave/piel */
+                        dark: '#4F5E4C',      /* Verde oscuro profundo */
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(79, 94, 76, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #fdfdfd;
+            /* Off-white for clean girl look */
+            color: #4F5E4C;
+        }
+
+        /* Custom scrollbar for aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #DAE7D7;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4F5E4C;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen selection:bg-secondary selection:text-dark">
+    <div id="root"></div>
+
+    <!-- GitHub Database Service -->
+    <script src="githubService.js"></script>
+
+    <!-- Main App Logic -->
+    <script type="text/babel" src="app.jsx"></script>
+</body>
+
+</html>
